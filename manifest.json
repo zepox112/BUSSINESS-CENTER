@@ -1,7 +1,7 @@
 {
     "name": "IAA Gender Support",
     "short_name": "IAA Market Place",
-    "start_url": "index.html",
+    "start_url": "Student.html",
     "display": "standalone",
     "background_color": "#061a3d",
     "theme_color": "#00d2ff",
