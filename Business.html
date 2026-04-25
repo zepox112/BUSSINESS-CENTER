@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Business Portal | Zepox Omni-Tech</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Orbitron:wght@500&display=swap"
+        rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#061a3d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="logo.jpg">
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" href="logo.jpg">
+
     <style>
         :root {
             --glass: rgba(255, 255, 255, 0.1);
@@ -75,6 +85,23 @@
             margin-top: 15px;
         }
 
+        /* Profile DP Style */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .user-dp {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--pink);
+            background: #333;
+        }
+
         .product-item {
             background: rgba(255, 255, 255, 0.08);
             padding: 12px;
@@ -118,11 +145,15 @@
             <h2 id="authTitle" style="color:var(--pink); text-align:center;">Ingia Sasa</h2>
             <input type="email" id="email" placeholder="Email" required>
             <input type="password" id="pass" placeholder="Neno la Siri" required>
+
             <div id="regFields" style="display: none;">
                 <input type="text" id="bizName" placeholder="Jina la Biashara">
-                <input type="tel" id="bizPhone" placeholder="WhatsApp">
+                <input type="tel" id="bizPhone" placeholder="WhatsApp Number">
                 <textarea id="bizDesc" placeholder="Maelezo fupi ya biashara..."></textarea>
+                <label style="font-size: 12px; opacity: 0.8; margin-left: 5px;">Picha ya Profile (DP):</label>
+                <input type="file" id="profileImage" accept="image/*">
             </div>
+
             <button class="btn-pink" id="authBtn" onclick="handleAuth()">INGIA</button>
             <p style="text-align:center; font-size:14px; margin-top:15px; cursor:pointer;" onclick="toggleAuth()">
                 <span id="toggleText">Huna akaunti?</span> <span
@@ -131,20 +162,21 @@
         </div>
 
         <div id="userDashboard" class="dashboard-section">
-            <h3><i class="fas fa-store"></i> <span id="displayBizName"></span> <i id="tickIcon"
-                    class="fas fa-check-circle verified-badge" style="display:none;"></i></h3>
-            <div
-                style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; font-size:12px; margin-bottom:20px;">
-                <i class="fas fa-info-circle"></i> Status: <span id="displayStatus"
-                    style="font-weight:bold;">Pending</span>
+            <div class="profile-header">
+                <img id="displayUserDP" src="" class="user-dp" alt="DP">
+                <div>
+                    <h3 style="margin:0;"><span id="displayBizName"></span> <i id="tickIcon"
+                            class="fas fa-check-circle verified-badge" style="display:none;"></i></h3>
+                    <div style="font-size:11px; opacity:0.7;">Status: <span id="displayStatus">Pending</span></div>
+                </div>
             </div>
 
             <h4>Ongeza Bidhaa</h4>
             <input type="text" id="pName" placeholder="Jina la Bidhaa">
             <input type="number" id="pPrice" placeholder="Bei (TSH)">
-            <textarea id="pDesc" placeholder="Maelezo mafupi ya bidhaa (mfano: Rangi, saizi, n.k)..."></textarea>
+            <textarea id="pDesc" placeholder="Maelezo ya bidhaa..."></textarea>
             <input type="file" id="pImage" accept="image/*">
-            <button class="btn-pink" id="uploadBtn" onclick="uploadProduct()">UPLOAD</button>
+            <button class="btn-pink" id="uploadBtn" onclick="uploadProduct()">UPLOAD BIDHAA</button>
 
             <h4 style="margin-top:25px;">Bidhaa Zako</h4>
             <div id="myProductsList"></div>
@@ -156,7 +188,7 @@
 
     <script>
         const IMGBB_API_KEY = "9d19a0f1d80f89446815cfbd8d40ee8c";
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9AquO0m3imocJw71j8_1Jam7SIO-3_YBeNxjR6XtZwlPYjCuv754owr4bJP1O-5rmDA/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzg2K20uBaBAvG1gdZhaE50eFl0UkJ708AZgcEu-2LDmBoq66yGym5hi8xmm8W9tlnCHw/exec";
         let isRegister = false;
         let currentUser = null;
 
@@ -164,7 +196,7 @@
             isRegister = !isRegister;
             document.getElementById('authTitle').innerText = isRegister ? "Sajili Biashara" : "Ingia Sasa";
             document.getElementById('regFields').style.display = isRegister ? "block" : "none";
-            document.getElementById('authBtn').innerText = isRegister ? "JISAJILI" : "INGIA";
+            document.getElementById('authBtn').innerText = isRegister ? "TENGENEZA AKAUNTI" : "INGIA";
             document.getElementById('toggleText').innerText = isRegister ? "Tayari unayo?" : "Huna akaunti?";
         }
 
@@ -176,13 +208,36 @@
             const btn = document.getElementById('authBtn');
             btn.innerText = "Inachakata..."; btn.disabled = true;
 
+            let profileUrl = "";
+
+            // Kama anasajili, pandisha picha ya DP kwanza
+            if (isRegister) {
+                const dpFile = document.getElementById('profileImage').files[0];
+                if (dpFile) {
+                    btn.innerText = "Inapakia DP...";
+                    try {
+                        const formData = new FormData();
+                        formData.append("image", dpFile);
+                        const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+                        const imgData = await imgRes.json();
+                        profileUrl = imgData.data.url;
+                    } catch (e) {
+                        alert("Imeshindwa kupakia picha ya profile!");
+                        btn.disabled = false;
+                        btn.innerText = "TENGENEZA AKAUNTI";
+                        return;
+                    }
+                }
+            }
+
             const payload = {
                 action: isRegister ? "register" : "login",
                 email: email,
                 pass: pass,
                 name: document.getElementById('bizName').value || "",
                 phone: document.getElementById('bizPhone').value || "",
-                desc: document.getElementById('bizDesc').value || ""
+                desc: document.getElementById('bizDesc').value || "",
+                profileUrl: profileUrl // Inatumwa kwenye Sheets (Link kutoka ImgBB)
             };
 
             try {
@@ -190,35 +245,47 @@
                 const data = await res.json();
                 if (data.success) {
                     currentUser = data.user;
-                    document.getElementById('authPanel').classList.remove('active');
-                    document.getElementById('userDashboard').classList.add('active');
-                    document.getElementById('displayBizName').innerText = currentUser.name;
-                    document.getElementById('displayStatus').innerText = currentUser.status || "Pending";
-                    if (currentUser.status && currentUser.status.toLowerCase() === "verified") {
-                        document.getElementById('tickIcon').style.display = "inline";
-                    }
-                    loadUserProducts();
+                    showDashboard();
                 } else {
                     alert(data.message);
                 }
             } catch (e) {
-                alert("Hitilafu ya mtandao!");
+                alert("Hitilafu ya seva!");
             } finally {
-                btn.innerText = isRegister ? "JISAJILI" : "INGIA";
+                btn.innerText = isRegister ? "TENGENEZA AKAUNTI" : "INGIA";
                 btn.disabled = false;
             }
+        }
+
+        function showDashboard() {
+            document.getElementById('authPanel').classList.remove('active');
+            document.getElementById('userDashboard').classList.add('active');
+            document.getElementById('displayBizName').innerText = currentUser.name;
+            document.getElementById('displayStatus').innerText = currentUser.status || "Pending";
+
+            // Onyesha DP ya mtumiaji (kama ipo)
+            const dpElement = document.getElementById('displayUserDP');
+            if (dpElement) {
+                dpElement.src = currentUser.profileUrl || "https://via.placeholder.com/70?text=Logo";
+            }
+
+            if (currentUser.status && currentUser.status.toLowerCase() === "verified") {
+                const tick = document.getElementById('tickIcon');
+                if (tick) tick.style.display = "inline";
+            }
+            loadUserProducts();
         }
 
         async function uploadProduct() {
             const file = document.getElementById('pImage').files[0];
             const name = document.getElementById('pName').value;
             const price = document.getElementById('pPrice').value;
-            const desc = document.getElementById('pDesc').value; // Inachukua description
+            const desc = document.getElementById('pDesc').value;
 
             if (!file || !name || !price) return alert("Jaza jina, bei na picha!");
 
             const btn = document.getElementById('uploadBtn');
-            btn.innerText = "Inapakia..."; btn.disabled = true;
+            btn.innerText = "Inapakia Bidhaa..."; btn.disabled = true;
 
             try {
                 const formData = new FormData();
@@ -226,7 +293,6 @@
                 const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
                 const imgData = await imgRes.json();
 
-                // Hapa: Inatuma pName, pPrice, na pDesc kwenda kwenye Apps Script
                 await fetch(SCRIPT_URL, {
                     method: "POST", body: JSON.stringify({
                         action: "addProduct",
@@ -239,36 +305,37 @@
                 });
 
                 alert("Bidhaa imepandishwa!");
-                // Safisha fomu
                 document.getElementById('pName').value = "";
                 document.getElementById('pPrice').value = "";
                 document.getElementById('pDesc').value = "";
                 document.getElementById('pImage').value = "";
                 loadUserProducts();
             } catch (e) { alert("Upload imefeli!"); }
-            finally { btn.innerText = "UPLOAD"; btn.disabled = false; }
+            finally { btn.innerText = "UPLOAD BIDHAA"; btn.disabled = false; }
         }
 
         async function loadUserProducts() {
             const list = document.getElementById('myProductsList');
+            if (!list) return;
             list.innerHTML = "<p style='text-align:center;'>Inapakia...</p>";
-
-            const res = await fetch(`${SCRIPT_URL}?action=readProducts&bizId=${currentUser.id}`);
-            const products = await res.json();
-
-            list.innerHTML = products.map(p => `
-                <div class="product-item">
-                    <img src="${p.image}" class="product-img" onerror="this.src='https://via.placeholder.com/60'">
-                    <div style="flex-grow:1">
-                        <strong>${p.productName}</strong><br>
-                        <small style="color:var(--pink)">TSH ${p.price}</small><br>
-                        <span style="font-size:10px; opacity:0.8;">${p.description || ''}</span>
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=readProducts&bizId=${currentUser.id}`);
+                const products = await res.json();
+                list.innerHTML = products.map(p => `
+                    <div class="product-item">
+                        <img src="${p.image}" class="product-img" onerror="this.src='https://via.placeholder.com/60'">
+                        <div style="flex-grow:1">
+                            <strong>${p.productName}</strong><br>
+                            <small style="color:var(--pink)">TSH ${Number(p.price).toLocaleString()}</small>
+                        </div>
+                        <button onclick="deleteProduct('${p.id}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer;">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
-                    <button onclick="deleteProduct('${p.id}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer;">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `).join('') || "<p style='text-align:center;'>Huna bidhaa.</p>";
+                `).join('') || "<p style='text-align:center; font-size:12px;'>Huna bidhaa bado.</p>";
+            } catch (e) {
+                list.innerHTML = "<p style='text-align:center;'>Hitilafu ya kupakia bidhaa.</p>";
+            }
         }
 
         async function deleteProduct(id) {
