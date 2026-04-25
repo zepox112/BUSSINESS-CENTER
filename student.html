@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="sw">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IAA Market | Airaza graphic solution</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --dark-blue: #0a192f;
+            --accent-blue: #00d2ff;
+            --pink: #ff85a2;
+            --blue-tick: #0095f6;
+            --hot: #ff4757;
+            --white: #ffffff;
+            --whatsapp: #25d366;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at top right, #1a2a6c, #0a192f, #000000);
+            background-attachment: fixed;
+            color: var(--white);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 30px 15px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(10, 25, 47, 0.7);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        /* Glass Animation Card */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-blue);
+            box-shadow: 0 15px 45px rgba(0, 210, 255, 0.2);
+        }
+
+        .card:active {
+            transform: scale(0.96);
+        }
+
+        .badge-container {
+            display: flex;
+            gap: 5px;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .logo-container {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-blue);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
+            }
+
+            100% {
+                box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+            }
+        }
+
+        .hot-badge {
+            background: linear-gradient(45deg, #ff4757, #ff6b81);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .blue-tick {
+            color: var(--blue-tick);
+            font-size: 0.9em;
+            margin-left: 6px;
+            text-shadow: 0 0 10px rgba(0, 149, 246, 0.5);
+        }
+
+        .biz-name {
+            font-size: 1.2rem;
+            margin: 10px 0 5px 0;
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 10, 20, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--dark-blue);
+            color: var(--white);
+            width: 92%;
+            max-width: 480px;
+            margin: 40px auto;
+            border-radius: 30px;
+            padding: 25px;
+            position: relative;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .whatsapp-bar {
+            background: var(--whatsapp);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: 0.3s;
+        }
+
+        .whatsapp-bar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.4);
+        }
+
+        .product-item {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 20px;
+            align-items: center;
+            border: 1px solid var(--glass-border);
+        }
+
+        .product-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            object-fit: cover;
+            margin-right: 15px;
+            background: #112240;
+        }
+
+        @media (max-width: 600px) {
+            .market-grid {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+
+            header h1 {
+                font-size: 1.3rem;
+            }
+
+            .modal-content {
+                margin: 20px auto;
+                width: 95%;
+            }
+
+            .main-logo {
+                width: 70px;
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="logo.jpg" alt="Logo" class="main-logo"
+                onerror="this.src='https://via.placeholder.com/80/0a192f/ffffff?text=IAA'">
+        </div>
+        <h1 style="letter-spacing: 1px;">🛒 IAA MARKETPLACE</h1>
+        <p style="font-size: 0.85rem; opacity: 0.7;">KUZA BIASHARA YAKIO SASA</p>
+    </header>
+
+    <div class="market-grid" id="market"></div>
+
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeModal()"
+                style="float:right; cursor:pointer; font-size:26px; color: #64748b; padding: 5px;">&times;</span>
+
+            <h2 id="modalBizName"
+                style="color: var(--white); margin: 0 0 15px 0; display:flex; align-items:center; font-size: 1.4rem;">
+            </h2>
+
+            <a href="#" id="whatsappBtn" class="whatsapp-bar" target="_blank">
+                <i class="fab fa-whatsapp" style="font-size: 1.8rem;"></i>
+                WASILIANA KWA WHATSAPP
+            </a>
+
+            <p id="modalBizDesc"
+                style="color: #ccd6f6; font-size: 14px; border-left: 4px solid var(--accent-blue); padding-left:15px; margin-bottom: 25px; line-height: 1.6;">
+            </p>
+
+            <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 20px 0;">
+            <h4 style="margin: 0 0 15px 0; font-size: 1rem; color: var(--accent-blue);"><i class="fas fa-box-open"></i>
+                ORODHA YA BIDHAA</h4>
+            <div id="productList"></div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxI9ssVRGd621C-LqYJSU07qDihM-UGINaPNB2WSBPqbVxyAejhq07mtyI9mKz90rRmjg/exec";
+
+        function loadFromCache() {
+            try {
+                const cachedData = localStorage.getItem('marketData');
+                if (cachedData) {
+                    const parsed = JSON.parse(cachedData);
+                    if (Array.isArray(parsed)) renderMarket(parsed);
+                }
+            } catch (e) {
+                localStorage.removeItem('marketData');
+            }
+        }
+
+        function renderMarket(data) {
+            const market = document.getElementById('market');
+            if (!market) return;
+
+            const sortedData = [...data].sort((a, b) => {
+                const aVerified = (a.status || "").toLowerCase().trim() === 'verified';
+                const bVerified = (b.status || "").toLowerCase().trim() === 'verified';
+                if (aVerified && !bVerified) return -1;
+                if (!aVerified && bVerified) return 1;
+                return b.visits - a.visits;
+            });
+
+            market.innerHTML = sortedData.map((b) => {
+                const isHot = b.visits > 50;
+                const isVerified = (b.status || "").toLowerCase().trim() === 'verified';
+                return `
+            <div class="card" onclick='openDetails(${JSON.stringify(b).replace(/'/g, "&apos;")})'>
+                <div class="badge-container">${isHot ? '<span class="hot-badge">HOT 🔥</span>' : ''}</div>
+                <h3 class="biz-name">
+                    ${b.name} ${isVerified ? '<i class="fas fa-check-circle blue-tick"></i>' : ''}
+                </h3>
+                <p style="font-size: 13px; color: #8892b0; margin: 5px 0; line-height: 1.4;">${b.description ? b.description.substring(0, 70) : ''}...</p>
+                <div style="font-size:11px; color: var(--accent-blue); font-weight: 500; margin-top: 10px;">
+                    <i class="fas fa-eye"></i> ${b.visits || 0} visits
+                </div>
+            </div>`;
+            }).join('');
+        }
+
+        async function fetchMarketData() {
+            try {
+                const response = await fetch(SCRIPT_URL + "?action=read");
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    localStorage.setItem('marketData', JSON.stringify(data));
+                    renderMarket(data);
+                }
+            } catch (e) { console.error("Refresh Silent Error"); }
+        }
+
+        async function openDetails(biz) {
+            const modal = document.getElementById('productModal');
+            const isVerified = (biz.status || "").toLowerCase().trim() === 'verified';
+            document.getElementById('modalBizName').innerHTML = `${biz.name} ${isVerified ? '<i class="fas fa-check-circle blue-tick"></i>' : ''}`;
+            document.getElementById('modalBizDesc').innerText = biz.description;
+
+            const waBtn = document.getElementById('whatsappBtn');
+
+            // 1. Safisha namba (ondoa herufi, alama kama +, na nafasi)
+            let cleanPhone = biz.phone ? biz.phone.toString().replace(/\D/g, '') : '';
+
+            // 2. Logic ya kuhakikisha inaanza na 255
+            if (cleanPhone.startsWith('0')) {
+                // Kama inaanza na 0 (mfano 0712...), toa 0 weka 255 mbele
+                cleanPhone = '255' + cleanPhone.substring(1);
+            } else if (cleanPhone.startsWith('7') || cleanPhone.startsWith('6')) {
+                // Kama inaanza na 7 au 6 moja kwa moja (mfano 712...), weka 255 mbele
+                cleanPhone = '255' + cleanPhone;
+            }
+            // Kama tayari inaanza na 255, itaiacha kama ilivyo.
+
+            waBtn.href = `https://wa.me/${cleanPhone}?text=Habari ${biz.name}, nimeona biashara yako kwenye IAA Marketplace. Nahitaji huduma yako.`;
+            const list = document.getElementById('productList');
+            list.innerHTML = "<p style='text-align:center; padding: 20px; font-size: 14px; opacity: 0.5;'>Inatayarisha bidhaa...</p>";
+            modal.style.display = 'block';
+
+            // LOGIC YA UNIQUE VIEWS:
+            // Tunachukua orodha ya ID ambazo mtumiaji ameshaona toka localStorage
+            let viewedItems = JSON.parse(localStorage.getItem('viewedBiz') || "[]");
+
+            if (!viewedItems.includes(biz.id)) {
+                // Kama hajawahi kuiona, tunatuma view kwenda seva
+                fetch(SCRIPT_URL + `?action=addView&id=${biz.id}`);
+                // Kisha tunaiongeza ID hiyo kwenye orodha ya simu hii
+                viewedItems.push(biz.id);
+                localStorage.setItem('viewedBiz', JSON.stringify(viewedItems));
+            }
+
+            try {
+                const res = await fetch(SCRIPT_URL + `?action=readProducts&bizId=${biz.id}`);
+                const products = await res.json();
+                list.innerHTML = products.map(p => `
+                <div class="product-item">
+                    <img src="${p.image || 'https://via.placeholder.com/70'}" class="product-img">
+                    <div style="flex-grow:1">
+                        <strong style="display:block; font-size: 14px; color: var(--white);">${p.productName}</strong>
+                        <span style="color: var(--accent-blue); font-weight:700; font-size: 13px; display:block; margin: 3px 0;">TSH ${Number(p.price).toLocaleString()}</span>
+                        <p style="font-size:11px; color:#8892b0; line-height: 1.4;">${p.description || ''}</p>
+                    </div>
+                </div>
+            `).join('') || "<p style='text-align:center; padding: 20px; color: #64748b;'>Bado hajapandisha bidhaa.</p>";
+            } catch (e) { list.innerHTML = "<p style='text-align:center; color: #ff4757;'>Mtandao unasumbua kidogo.</p>"; }
+        }
+
+        function closeModal() { document.getElementById('productModal').style.display = 'none'; }
+        window.onclick = (e) => { if (e.target.className === 'modal') closeModal(); }
+
+        loadFromCache();
+        fetchMarketData();
+        setInterval(fetchMarketData, 5000); 
+    </script>
+</body>
+
+</html>

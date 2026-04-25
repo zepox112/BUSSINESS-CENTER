@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="sw">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAA Admin - Glass Edition</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --pink-accent: #ff85a2;
+            --white: #ffffff;
+            --grey-text: #e0e0e0;
+            --blue-tick: #0095f6;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
+            background-attachment: fixed;
+            color: var(--white);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--pink-accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            transition: 0.3s;
+        }
+
+        .stat-card h2 {
+            text-align: left;
+            margin: 5px 0;
+            color: var(--white);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: rgba(255, 133, 162, 0.2);
+            padding: 15px;
+            text-align: left;
+            color: var(--pink-accent);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+        }
+
+        .btn-verify {
+            background: var(--pink-accent);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        .btn-verify:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            width: 90%;
+            max-width: 700px;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 25px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .biz-contact-info {
+            background: #eef2f3;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--blue-tick);
+        }
+
+        .biz-desc {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            font-style: italic;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--pink-accent);
+        }
+
+        .product-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            margin-right: 20px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .blue-tick {
+            color: var(--blue-tick);
+            margin-left: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2> IAA Teachers Bussiness Control Panel</h2>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <small>Active Businesses</small>
+                <h2 id="totalBiz">0</h2>
+            </div>
+            <div class="stat-card">
+                <small>Most Visited 🔥</small>
+                <h2 id="topBiz" style="color: var(--pink-accent);">-</h2>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Biashara</th>
+                        <th>Views</th>
+                        <th>Status</th>
+                        <th>Kitendo</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="bizModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeModal()" style="float:right; cursor:pointer; font-size:28px;">&times;</span>
+            <h2 id="modalBizName" style="text-align:left; color:#333;">Jina la Biashara</h2>
+
+            <div class="biz-contact-info">
+                <strong><i class="fas fa-phone-alt"></i> Simu:</strong> <span id="modalBizPhone">N/A</span><br>
+                <strong><i class="fas fa-envelope"></i> Email:</strong> <span id="modalBizEmail">N/A</span>
+            </div>
+
+            <div class="biz-desc">
+                <strong>Maelezo ya Biashara:</strong><br>
+                <span id="modalBizDesc">Maelezo hapa...</span>
+            </div>
+
+            <h4 style="border-bottom: 2px solid var(--pink-accent); padding-bottom:5px;">Bidhaa za Muuzaji</h4>
+            <div id="productList"></div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxI9ssVRGd621C-LqYJSU07qDihM-UGINaPNB2WSBPqbVxyAejhq07mtyI9mKz90rRmjg/exec";
+        let allData = [];
+
+        // 1. Pakia kutoka Cache (LocalStorage) mara ya kwanza
+        function loadFromCache() {
+            const cached = localStorage.getItem('adminMarketData');
+            if (cached) {
+                allData = JSON.parse(cached);
+                renderTable(allData);
+            }
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch(SCRIPT_URL + "?action=read");
+                const data = await res.json();
+                allData = data;
+
+                // Hifadhi kwenye LocalStorage
+                localStorage.setItem('adminMarketData', JSON.stringify(data));
+
+                renderTable(data);
+            } catch (e) {
+                console.error("Data Load Error", e);
+            }
+        }
+
+        function renderMarket(data) { renderTable(data); }
+
+        function renderTable(data) {
+            const table = document.getElementById('adminTable');
+            if (!table) return;
+            const sorted = [...data].sort((a, b) => b.visits - a.visits);
+
+            document.getElementById('totalBiz').innerText = data.length;
+            document.getElementById('topBiz').innerText = sorted[0] ? sorted[0].name : "N/A";
+
+            table.innerHTML = sorted.map(b => {
+                const isVerified = (b.status || "").toLowerCase().trim() === 'verified';
+                return `
+                <tr onclick="openBizDetails(${JSON.stringify(b).replace(/"/g, '&quot;')})">
+                    <td>
+                        <strong>${b.name}</strong> 
+                        ${isVerified ? '<i class="fas fa-check-circle blue-tick"></i>' : ''}
+                    </td>
+                    <td>👁️ ${b.visits || 0}</td>
+                    <td><small>${b.status || 'Pending'}</small></td>
+                    <td>
+                        ${!isVerified ?
+                        `<button class="btn-verify" onclick="event.stopPropagation(); verifyBiz('${b.id}', this)">Verify</button>` :
+                        '<span style="color:#2ecc71; font-weight:bold;">Verified ✔️</span>'}
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        async function verifyBiz(id, btn) {
+            if (!confirm("Je, una uhakika unataka kuipa biashara hii Blue Tick?")) return;
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "verify", id: id })
+                });
+                if (response.ok) { loadData(); }
+            } catch (e) { alert("Hitilafu imetokea!"); btn.disabled = false; btn.innerText = "Verify"; }
+        }
+
+        async function openBizDetails(biz) {
+            document.getElementById('modalBizName').innerText = biz.name;
+            document.getElementById('modalBizPhone').innerText = biz.phone || "N/A";
+            document.getElementById('modalBizEmail').innerText = biz.email || "N/A";
+            document.getElementById('modalBizDesc').innerText = biz.description || "Haina maelezo.";
+            const list = document.getElementById('productList');
+            list.innerHTML = "Inatafuta bidhaa...";
+            document.getElementById('bizModal').style.display = 'block';
+
+            // LOGIC YA UNIQUE VIEWS
+            let viewedItems = JSON.parse(localStorage.getItem('admin_viewedBiz') || "[]");
+            if (!viewedItems.includes(biz.id)) {
+                fetch(SCRIPT_URL + `?action=addView&id=${biz.id}`);
+                viewedItems.push(biz.id);
+                localStorage.setItem('admin_viewedBiz', JSON.stringify(viewedItems));
+            }
+
+            try {
+                const res = await fetch(SCRIPT_URL + `?action=readProducts&bizId=${biz.id}`);
+                const products = await res.json();
+                if (products.length === 0) {
+                    list.innerHTML = "<p>Muuzaji huyu hajaposti bidhaa bado.</p>";
+                } else {
+                    list.innerHTML = products.map(p => `
+                        <div class="product-card">
+                            <img src="${p.image || 'https://via.placeholder.com/80'}" class="product-img">
+                            <div>
+                                <strong style="font-size:16px;">${p.productName}</strong><br>
+                                <span style="color:var(--pink-accent); font-weight:bold;">TSH ${Number(p.price).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { list.innerHTML = "Hitilafu imetokea."; }
+        }
+
+        function closeModal() { document.getElementById('bizModal').style.display = 'none'; }
+        window.onclick = function (e) { if (e.target.id === 'bizModal') closeModal(); }
+
+        // Start Logic
+        loadFromCache();
+        loadData();
+        setInterval(loadData, 3000); // REFRESH KILA SEKUNDE 3
+    </script>
+</body>
+
+</html>

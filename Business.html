@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="sw">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Business Portal | Zepox Omni-Tech</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.1);
+            --pink: #ff85a2;
+            --blue-tick: #0095f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: linear-gradient(45deg, #2c3e50, #000);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .main-card {
+            width: 100%;
+            max-width: 500px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            height: fit-content;
+        }
+
+        .auth-section,
+        .dashboard-section {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            outline: none;
+            font-size: 16px;
+        }
+
+        .btn-pink {
+            width: 100%;
+            padding: 15px;
+            background: var(--pink);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .product-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            border-left: 4px solid var(--pink);
+        }
+
+        .product-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+
+        .verified-badge {
+            color: var(--blue-tick);
+            margin-left: 8px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .main-card {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-card">
+        <div id="authPanel" class="auth-section active">
+            <h2 id="authTitle" style="color:var(--pink); text-align:center;">Ingia Sasa</h2>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="pass" placeholder="Neno la Siri" required>
+            <div id="regFields" style="display: none;">
+                <input type="text" id="bizName" placeholder="Jina la Biashara">
+                <input type="tel" id="bizPhone" placeholder="WhatsApp">
+                <textarea id="bizDesc" placeholder="Maelezo fupi ya biashara..."></textarea>
+            </div>
+            <button class="btn-pink" id="authBtn" onclick="handleAuth()">INGIA</button>
+            <p style="text-align:center; font-size:14px; margin-top:15px; cursor:pointer;" onclick="toggleAuth()">
+                <span id="toggleText">Huna akaunti?</span> <span
+                    style="color:var(--pink); font-weight:bold;">Jisajili</span>
+            </p>
+        </div>
+
+        <div id="userDashboard" class="dashboard-section">
+            <h3><i class="fas fa-store"></i> <span id="displayBizName"></span> <i id="tickIcon"
+                    class="fas fa-check-circle verified-badge" style="display:none;"></i></h3>
+            <div
+                style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; font-size:12px; margin-bottom:20px;">
+                <i class="fas fa-info-circle"></i> Status: <span id="displayStatus"
+                    style="font-weight:bold;">Pending</span>
+            </div>
+
+            <h4>Ongeza Bidhaa</h4>
+            <input type="text" id="pName" placeholder="Jina la Bidhaa">
+            <input type="number" id="pPrice" placeholder="Bei (TSH)">
+            <textarea id="pDesc" placeholder="Maelezo mafupi ya bidhaa (mfano: Rangi, saizi, n.k)..."></textarea>
+            <input type="file" id="pImage" accept="image/*">
+            <button class="btn-pink" id="uploadBtn" onclick="uploadProduct()">UPLOAD</button>
+
+            <h4 style="margin-top:25px;">Bidhaa Zako</h4>
+            <div id="myProductsList"></div>
+            <button onclick="location.reload()"
+                style="background:none; color:white; border:none; width:100%; margin-top:20px; cursor:pointer;">Toka
+                (Logout)</button>
+        </div>
+    </div>
+
+    <script>
+        const IMGBB_API_KEY = "9d19a0f1d80f89446815cfbd8d40ee8c";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9AquO0m3imocJw71j8_1Jam7SIO-3_YBeNxjR6XtZwlPYjCuv754owr4bJP1O-5rmDA/exec";
+        let isRegister = false;
+        let currentUser = null;
+
+        function toggleAuth() {
+            isRegister = !isRegister;
+            document.getElementById('authTitle').innerText = isRegister ? "Sajili Biashara" : "Ingia Sasa";
+            document.getElementById('regFields').style.display = isRegister ? "block" : "none";
+            document.getElementById('authBtn').innerText = isRegister ? "JISAJILI" : "INGIA";
+            document.getElementById('toggleText').innerText = isRegister ? "Tayari unayo?" : "Huna akaunti?";
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('pass').value.trim();
+            if (!email || !pass) return alert("Jaza email na password!");
+
+            const btn = document.getElementById('authBtn');
+            btn.innerText = "Inachakata..."; btn.disabled = true;
+
+            const payload = {
+                action: isRegister ? "register" : "login",
+                email: email,
+                pass: pass,
+                name: document.getElementById('bizName').value || "",
+                phone: document.getElementById('bizPhone').value || "",
+                desc: document.getElementById('bizDesc').value || ""
+            };
+
+            try {
+                const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+                const data = await res.json();
+                if (data.success) {
+                    currentUser = data.user;
+                    document.getElementById('authPanel').classList.remove('active');
+                    document.getElementById('userDashboard').classList.add('active');
+                    document.getElementById('displayBizName').innerText = currentUser.name;
+                    document.getElementById('displayStatus').innerText = currentUser.status || "Pending";
+                    if (currentUser.status && currentUser.status.toLowerCase() === "verified") {
+                        document.getElementById('tickIcon').style.display = "inline";
+                    }
+                    loadUserProducts();
+                } else {
+                    alert(data.message);
+                }
+            } catch (e) {
+                alert("Hitilafu ya mtandao!");
+            } finally {
+                btn.innerText = isRegister ? "JISAJILI" : "INGIA";
+                btn.disabled = false;
+            }
+        }
+
+        async function uploadProduct() {
+            const file = document.getElementById('pImage').files[0];
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const desc = document.getElementById('pDesc').value; // Inachukua description
+
+            if (!file || !name || !price) return alert("Jaza jina, bei na picha!");
+
+            const btn = document.getElementById('uploadBtn');
+            btn.innerText = "Inapakia..."; btn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append("image", file);
+                const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+                const imgData = await imgRes.json();
+
+                // Hapa: Inatuma pName, pPrice, na pDesc kwenda kwenye Apps Script
+                await fetch(SCRIPT_URL, {
+                    method: "POST", body: JSON.stringify({
+                        action: "addProduct",
+                        bizId: currentUser.id,
+                        pName: name,
+                        pPrice: price,
+                        pDesc: desc,
+                        imageUrl: imgData.data.url
+                    })
+                });
+
+                alert("Bidhaa imepandishwa!");
+                // Safisha fomu
+                document.getElementById('pName').value = "";
+                document.getElementById('pPrice').value = "";
+                document.getElementById('pDesc').value = "";
+                document.getElementById('pImage').value = "";
+                loadUserProducts();
+            } catch (e) { alert("Upload imefeli!"); }
+            finally { btn.innerText = "UPLOAD"; btn.disabled = false; }
+        }
+
+        async function loadUserProducts() {
+            const list = document.getElementById('myProductsList');
+            list.innerHTML = "<p style='text-align:center;'>Inapakia...</p>";
+
+            const res = await fetch(`${SCRIPT_URL}?action=readProducts&bizId=${currentUser.id}`);
+            const products = await res.json();
+
+            list.innerHTML = products.map(p => `
+                <div class="product-item">
+                    <img src="${p.image}" class="product-img" onerror="this.src='https://via.placeholder.com/60'">
+                    <div style="flex-grow:1">
+                        <strong>${p.productName}</strong><br>
+                        <small style="color:var(--pink)">TSH ${p.price}</small><br>
+                        <span style="font-size:10px; opacity:0.8;">${p.description || ''}</span>
+                    </div>
+                    <button onclick="deleteProduct('${p.id}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('') || "<p style='text-align:center;'>Huna bidhaa.</p>";
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm("Futa bidhaa hii?")) return;
+            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "deleteProduct", id: id }) });
+            loadUserProducts();
+        }
+    </script>
+</body>
+
+</html>
